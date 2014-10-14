@@ -18,8 +18,8 @@ class Central: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     super.init()
     
     tView = textView
+    tView!.text = ""
     centralManager = CBCentralManager(delegate: self, queue: nil)
-    centralManager!.scanForPeripheralsWithServices([UUID_STRING], options: nil)
   }
   
   func centralManager(central: CBCentralManager!, didDiscoverPeripheral peripheral: CBPeripheral!, advertisementData: [NSObject : AnyObject]!, RSSI: NSNumber!) {
@@ -31,12 +31,34 @@ class Central: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
   }
   
   func centralManagerDidUpdateState(central: CBCentralManager!) {
-    println("Central state updated to \(central.state)")
+    switch central.state {
+    case CBCentralManagerState.Unknown:
+      println("Central state updated to Unknown")
+    case CBCentralManagerState.Resetting:
+      println("Central state updated to Resetting")
+    case CBCentralManagerState.Unsupported:
+      println("Central state updated to Unsupported")
+    case CBCentralManagerState.Unauthorized:
+      println("Central state updated to Unauthorized")
+    case CBCentralManagerState.PoweredOff:
+      println("Central state updated to PoweredOff")
+    case CBCentralManagerState.PoweredOn:
+      println("Central state updated to PoweredOn")
+      centralManager!.scanForPeripheralsWithServices([CBUUID.UUIDWithString(UUID_STRING)], options: nil)
+    default:
+      println("Central state updated to WAT??!!")
+    }
   }
   
   func centralManager(central: CBCentralManager!, didConnectPeripheral peripheral: CBPeripheral!) {
     println("Peripheral connected")
     peripheral.delegate = self
+  }
+  
+  func restart() {
+    tView!.text = ""
+    centralManager!.stopScan()
+    centralManager!.scanForPeripheralsWithServices([CBUUID.UUIDWithString(UUID_STRING)], options: nil)
   }
   
   

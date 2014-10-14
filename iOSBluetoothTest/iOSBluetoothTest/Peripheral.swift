@@ -20,27 +20,46 @@ class Peripheral: NSObject, CBPeripheralManagerDelegate {
   override init() {
     
     nameCharacteristic = CBMutableCharacteristic(type: serviceUUID, properties: CBCharacteristicProperties.Read, value: "Carlos Alonso".dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false), permissions: CBAttributePermissions.Readable)
-    var nameService = CBMutableService(type: serviceUUID, primary: true)
-    nameService.characteristics = [nameCharacteristic]
+    
     
     super.init()
     
     peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
-    peripheralManager!.addService(nameService)
-    
-    peripheralManager!.startAdvertising([ CBAdvertisementDataServiceUUIDsKey: [nameService.UUID]])
   }
   
   func peripheralManagerDidUpdateState(peripheral: CBPeripheralManager!) {
-    println("New status: \(peripheral.state)")
+    switch peripheral.state {
+    case CBPeripheralManagerState.Unknown:
+      println("Peripheral state updated to Unknown")
+    case CBPeripheralManagerState.Resetting:
+      println("Peripheral state updated to Resetting")
+    case CBPeripheralManagerState.Unsupported:
+      println("Peripheral state updated to Unsupported")
+    case CBPeripheralManagerState.Unauthorized:
+      println("Peripheral state updated to Unauthorized")
+    case CBPeripheralManagerState.PoweredOff:
+      println("Peripheral state updated to PoweredOff")
+    case CBPeripheralManagerState.PoweredOn:
+      println("Peripheral state updated to PoweredOn")
+      var nameService = CBMutableService(type: serviceUUID, primary: true)
+      nameService.characteristics = [nameCharacteristic]
+      peripheralManager!.addService(nameService)
+      peripheralManager!.startAdvertising([ CBAdvertisementDataServiceUUIDsKey: [nameService.UUID], CBAdvertisementDataLocalNameKey: "olakease"])
+    default:
+      println("Peripheral state updated to WAT??!!")
+    }
   }
   
   func peripheralManager(peripheral: CBPeripheralManager!, didAddService service: CBService!, error: NSError!) {
-    println("Error adding service: \(error.localizedDescription)")
+    if error != nil {
+      println("Error adding service: \(error.localizedDescription)")
+    }
   }
   
   func peripheralManagerDidStartAdvertising(peripheral: CBPeripheralManager!, error: NSError!) {
-    println("Error advertising: \(error.localizedDescription)")
+    if error != nil {
+      println("Error advertising: \(error.localizedDescription)")
+    }
   }
   
   func peripheralManager(peripheral: CBPeripheralManager!, didReceiveReadRequest request: CBATTRequest!) {
